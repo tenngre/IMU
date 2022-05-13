@@ -26,8 +26,8 @@ BUFFER_SIZE = 1024
 
 SENSOR_TC = 0
 SENSOR_INTERNAL = 1
-SENSORS = {SENSOR_TC: 'Thermocouple',
-           SENSOR_INTERNAL: 'Internal'}
+SENSORS = {SENSOR_TC: 'Raspi1',
+           SENSOR_INTERNAL: 'Time'}
 
 stopEvent = threading.Event()
 
@@ -172,18 +172,16 @@ class Plotter:
             dataPoints = []
             while not self.temperatures.empty() and not self._stopped:
                 data = self.temperatures.get()
-                if data and ',' in data:
-                    sensorID, timeVal, tempInC = data.split(',')
-                    sensorID = int(sensorID)
-                    timeVal = float(timeVal)
-                    tempInC = float(tempInC)
-                    if sensorID == -1:
-                        # end signaled
-                        self.stop()
-                    else:
-                        if sensorID == SENSOR_TC:
-                            print(tempInC)
-                        dataPoints.append((sensorID, timeVal, tempInC))
+                # sensorID = int(sensorID)
+                timeVal = float(data)
+                tempInC = float(data)
+                # if sensorID == -1:
+                #     # end signaled
+                #     self.stop()
+                # else:
+                #     if sensorID == SENSOR_TC:
+                #         print(tempInC)
+                dataPoints.append((timeVal, tempInC))
             if dataPoints:
                 yield dataPoints
 
@@ -245,7 +243,7 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--serverip', default="192.168.31.205",
+    parser.add_argument('--serverip', default="127.0.0.1",
                         help='hostname or ip address of the server to connect to')
 
     args = parser.parse_args()

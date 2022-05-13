@@ -85,7 +85,7 @@ class TransmitterMultiSocket(Transmitter):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--serverip', default='192.168.31.205',
+    parser.add_argument('--serverip', default='127.0.0.1',
                         help='hostname or ip address of the server to connect to')
 
     args = parser.parse_args()

@@ -53,8 +53,8 @@ class Transmitter(object):
     def sendDataPoint(self, temperature):
         self.preSend()
         print(f'Send DATA is {temperature}!')
-        self.socket.sendall(f'{temperature}'))
-        data = self.socket.recv(BUFFER_SIZE)
+        self.socket.sendall(f'{temperature}')
+        # data = self.socket.recv(BUFFER_SIZE)
         self.postSend()
 
     def signalEnd(self):

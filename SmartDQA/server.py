@@ -96,7 +96,7 @@ class Receiver(Thread):
         while not stopEvent.isSet():
             # get data in possible buffer-sized chunks
             data = self.clientSocket.recv(BUFFER_SIZE)
-            print(f'Received DATA is HERE {data}')
+            print(f'Received DATA: {data}')
             self.clientSocket.send(data)  # echo
 
         self.dataQueue.put(''.join(allData))
@@ -243,7 +243,7 @@ if __name__ == '__main__':
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--serverip', default="127.0.0.1",
+    parser.add_argument('--serverip', default="192.168.31.205",
                         help='hostname or ip address of the server to connect to')
 
     args = parser.parse_args()

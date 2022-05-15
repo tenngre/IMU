@@ -8,7 +8,8 @@ server : the server.
 import socket
 import time
 import argparse
-
+import serial
+from WitSensor import *
 
 SPI_PORT = 0
 SPI_DEVICE = 0
@@ -20,19 +21,21 @@ SENSOR_TC = 0
 SENSOR_INTERNAL = 1
 
 
-def senseTemperatures():
-    # sensor = MAX31855.MAX31855(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE))
+def senseTemperatures():  # TO DO rename it to sensorInit
+    ser = serial.Serial("/dev/ttyS0", 9600, timeout=0.5)  # ser = serial.Serial('com7',115200, timeout=0.5)
+    print(ser.is_open)
+
     timeStart = time.time()
     transmitter = TransmitterSingleSocket()
     try:
         while True:
             timeNow = time.time()
+            dataHex = ser.read(33)
             timeVal = timeNow - timeStart
-            # tempInC = sensor.readTempC()
-            # internalTempInC = sensor.readInternalC()
-            transmitter.sendDataPoint(timeVal)
-            # transmitter.sendDataPoint(internalTempInC)
-            time.sleep(0.05)
+            data = DueData(dataHex)
+            if data is not None:
+                transmitter.sendDataPoint(data)
+                # transmitter.sendDataPoint(timeVal)
     except KeyboardInterrupt:
         transmitter.signalEnd()
         transmitter.close()
@@ -50,7 +53,7 @@ class Transmitter(object):
     def sendDataPoint(self, temperature):
         self.preSend()
         print(f'Send DATA is {temperature}!')
-        self.socket.sendall(str.encode(f'Time interval {temperature}'))
+        self.socket.sendall(f'{temperature}'))
         data = self.socket.recv(BUFFER_SIZE)
         self.postSend()
 
@@ -83,9 +86,8 @@ class TransmitterMultiSocket(Transmitter):
 
 
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser()
-    parser.add_argument('--serverip', default='127.0.0.1',
+    parser.add_argument('--serverip', default='192.168.31.205',
                         help='hostname or ip address of the server to connect to')
 
     args = parser.parse_args()

@@ -1,16 +1,24 @@
-# This is a sample Python script.
+from ServerFiles import *
 
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
-
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press ⌘F8 to toggle the breakpoint.
-
-
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    import argparse
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--serverip', default="192.168.31.205",
+                        help='hostname or ip address of the server to connect to')
+
+    args = parser.parse_args()
+    SERVER_IP = args.serverip
+
+    Msg = Queue()
+    server, queueMonitor, plotter = (None, None, None)
+    try:
+        server = Server(Msg)
+        server.start()
+        plotter = Plotter(Msg)
+        plotter.run()
+    finally:
+        if server:
+            server.close()
+        if plotter:
+            plotter.stop()

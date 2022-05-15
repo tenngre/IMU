@@ -31,11 +31,10 @@ def senseTemperatures():  # TO DO rename it to sensorInit
         while True:
             timeNow = time.time()
             dataHex = ser.read(33)
-            timeVal = timeNow - timeStart
             data = DueData(dataHex)
             if data is not None:
                 transmitter.sendDataPoint(data)
-                # transmitter.sendDataPoint(timeVal)
+
     except KeyboardInterrupt:
         transmitter.signalEnd()
         transmitter.close()
@@ -50,11 +49,11 @@ class Transmitter(object):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.connect((TCP_IP, TCP_PORT))
 
-    def sendDataPoint(self, temperature):
+    def sendDataPoint(self, transmitData):
         self.preSend()
-        print(f'Send DATA is {temperature}!')
-        self.socket.sendall(f'{temperature}')
-        # data = self.socket.recv(BUFFER_SIZE)
+        # print(f'Send DATA is {transmitData}')
+        self.socket.sendall(str.encode(str(transmitData)))
+        data = self.socket.recv(BUFFER_SIZE)
         self.postSend()
 
     def signalEnd(self):

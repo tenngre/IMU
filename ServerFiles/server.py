@@ -103,8 +103,8 @@ class Receiver(Thread):
             # get data in possible buffer-sized chunks
             data = self.clientSocket.recv(self.BUFFER_SIZE)
             self.clientSocket.send(data)  # echo
-
-        self.dataQueue.put(''.join(allData))
+            print(f'data is {data}')
+        # self.dataQueue.put(''.join(allData))
 
         return ''.join(allData)
 
@@ -130,6 +130,19 @@ class ReceiverMultiSocket(Receiver):
 
     def postReceive(self):
         self.close()
+
+
+class GetData:
+    def __int__(self, Msg):
+        self.Msg = Msg  # the Queue.
+
+    def getData(self):
+        dataPoints = []
+        while not self.Msg.empty():
+            data = self.Msg.get()
+            tempInC = float(data)
+            dataPoints.append(tempInC)
+            yield dataPoints
 
 
 class Plotter:

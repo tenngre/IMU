@@ -22,16 +22,6 @@ def DueData(inputData):  # 新增的核心程序，对读取的数据进行划�
     global w
     global m
 
-    # ACCData = [0.0] * 8
-    # GYROData = [0.0] * 8
-    # mData = [0.0] * 8
-    # FrameState = 0  # 通过\x后面的值判断属于哪一种情况
-    # ByteNum = 0  # 读取到这一段的第几位
-    # CheckSum = 0  # 求和校验位
-    #
-    # a = [0.0] * 3
-    # w = [0.0] * 3
-    # m = [0.0] * 3
     d = []
     for data in inputData:  # 在输入的数据进行遍历
         if FrameState == 0:  # 当未确定状态的时候，进入以下判断
@@ -83,18 +73,16 @@ def DueData(inputData):  # 新增的核心程序，对读取的数据进行划�
                 ByteNum += 1
             else:
                 if data == (CheckSum & 0xff):
+                    timeNow = time.time()
                     m = get_m(mData)
                     d = list(a) + list(w) + list(m)
-                    # print(f"a(g):{d[0]:.3f} {d[1]:.3f} {d[2]:.3f}\
-                    #         w(deg/s):{d[3]:.3f} {d[4]:.3f} {d[5]:.3f}\
-                    #         m(deg):{d[6]:.3f} {d[7]:.3f} {d[8]:.3f}"
+                    d.append(timeNow)
                 CheckSum = 0
                 ByteNum = 0
                 FrameState = 0
 
     if len(d) != 0:
         return d
-
 
 
 def get_acc(datahex):
@@ -187,7 +175,6 @@ def get_m(datahex):
         m_z -= 2 * k_m
 
     return m_x, m_y, m_z
-
 
 # def read_data():
 #     ser = serial.Serial("/dev/ttyS0", 9600, timeout=0.5)  # ser = serial.Serial('com7',115200, timeout=0.5)

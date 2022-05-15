@@ -17,10 +17,11 @@ if __name__ == '__main__':
     try:
         server = Server(Msg, config)
         server.start()
+        initSensor()
         plotter = Plotter(Msg)
         plotter.run()
     finally:
         if server:
             server.close()
-        if plotter:
-            plotter.stop()
+        # if plotter:
+        #     plotter.stop()

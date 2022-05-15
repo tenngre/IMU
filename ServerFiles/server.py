@@ -20,9 +20,6 @@ import time
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-SERVER_IP = None
-TCP_PORT = 5500
-BUFFER_SIZE = 1024
 
 SENSOR_TC = 0
 SENSOR_INTERNAL = 1
@@ -39,12 +36,18 @@ class Server(Thread):
     Handles one or many clients
     """
 
-    def __init__(self, dataQueue):
+    def __init__(self, dataQueue, config):
+        self.kwargs = config["server"]
+
+        self.SERVER_IP = self.kwargs["SERVER_IP"]
+        self.TCP_PORT = self.kwargs["TCP_PORT"]
+        self.BUFFER_SIZE = self.kwargs["BUFFER_SIZE"]
+
         Thread.__init__(self)
-        serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        serversocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        serversocket.bind((SERVER_IP, TCP_PORT))
-        self.serverSocket = serversocket
+        serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        serverSocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        serverSocket.bind((self.SERVER_IP, self.TCP_PORT))
+        self.serverSocket = serverSocket
         self.dataQueue = dataQueue
         self._stopped = False
         self._receivers = []
@@ -58,8 +61,10 @@ class Server(Thread):
         while not stopEvent.isSet():
             # accept connections from outside
             clientSocket, address = self.serverSocket.accept()
-            receiver = Receiver(clientSocket, address, self.dataQueue, self)
+            receiver = Receiver(clientSocket, address, self.dataQueue, self, self.BUFFER_SIZE)
             receiver.start()
+            x = receiver.getOneDataPoint()
+            print("[INFO]", x)
 
     def close(self):
         self._stopped = True
@@ -72,14 +77,15 @@ class Receiver(Thread):
     Get data from a single client
     """
 
-    def __init__(self, clientSocket, address, dataQueue, server):
+    def __init__(self, clientSocket, address, dataQueue, server, BUFFER_SIZE):
         Thread.__init__(self)
         self.clientSocket = clientSocket
         self.address = address
-        self.dataQueue = dataQueue
         self.noDataCount = 0
+        self.dataQueue = dataQueue
         self._stopped = False
         self._server = server
+        self.BUFFER_SIZE = BUFFER_SIZE
 
     def run(self):
         """
@@ -95,17 +101,12 @@ class Receiver(Thread):
         allData = []
         while not stopEvent.isSet():
             # get data in possible buffer-sized chunks
-            data = self.clientSocket.recv(BUFFER_SIZE)
-            print(f'Received DATA: {data}')
+            data = self.clientSocket.recv(self.BUFFER_SIZE)
             self.clientSocket.send(data)  # echo
 
         self.dataQueue.put(''.join(allData))
-        self.postReceive()
 
         return ''.join(allData)
-
-    def postReceive(self):
-        pass
 
     def stop(self):
         self._stopped = True
@@ -239,25 +240,25 @@ class QueueMonitor(Thread):
         self._stopped = True
 
 
-if __name__ == '__main__':
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument('--serverip', default="192.168.31.205",
-                        help='hostname or ip address of the server to connect to')
-
-    args = parser.parse_args()
-    SERVER_IP = args.serverip
-
-    Msg = Queue()
-    server, queueMonitor, plotter = (None, None, None)
-    try:
-        server = Server(Msg)
-        server.start()
-        plotter = Plotter(Msg)
-        plotter.run()
-    finally:
-        if server:
-            server.close()
-        if plotter:
-            plotter.stop()
+# if __name__ == '__main__':
+#     import argparse
+#
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument('--serverip', default="192.168.31.205",
+#                         help='hostname or ip address of the server to connect to')
+#
+#     args = parser.parse_args()
+#     SERVER_IP = args.serverip
+#
+#     Msg = Queue()
+#     server, queueMonitor, plotter = (None, None, None)
+#     try:
+#         server = Server(Msg)
+#         server.start()
+#         plotter = Plotter(Msg)
+#         plotter.run()
+#     finally:
+#         if server:
+#             server.close()
+#         if plotter:
+#             plotter.stop()

@@ -1,2 +1,2 @@
 from .server import *
-from dataInit import *
+from .dataInit import *

@@ -35,19 +35,19 @@ def DueData(inputData):  # 新增的核心程序，对读取的数据进行划�
     d = []
     for data in inputData:  # 在输入的数据进行遍历
         if FrameState == 0:  # 当未确定状态的时候，进入以下判断
-            if data == \x55 and ByteNum == 0:  # \x55位于第一位时候，开始读取数据，增大ByteNum
+            if data == 0x55 and ByteNum == 0:  # 0x55位于第一位时候，开始读取数据，增大ByteNum
                 CheckSum = data
                 ByteNum = 1
                 continue
-            elif data == \x51 and ByteNum == 1:  # 在byte不为0 且 识别到 \x51 的时候，改变frame
+            elif data == 0x51 and ByteNum == 1:  # 在byte不为0 且 识别到 0x51 的时候，改变frame
                 CheckSum += data
                 FrameState = 1
                 ByteNum = 2
-            elif data == \x52 and ByteNum == 1:  # 同理
+            elif (data == 0x52) and (ByteNum == 1):  # 同理
                 CheckSum += data
                 FrameState = 2
                 ByteNum = 2
-            elif data == \x54 and ByteNum == 1:
+            elif data == 0x54 and ByteNum == 1:
                 CheckSum += data
                 FrameState = 3
                 ByteNum = 2
@@ -58,7 +58,7 @@ def DueData(inputData):  # 新增的核心程序，对读取的数据进行划�
                 CheckSum += data
                 ByteNum += 1
             else:
-                if data == (CheckSum & \xff):  # 假如校验位正确
+                if data == (CheckSum & 0xff):  # 假如校验位正确
                     a = get_acc(ACCData)
                 CheckSum = 0  # 各数据归零，进行新的循环判断
                 ByteNum = 0
@@ -70,7 +70,7 @@ def DueData(inputData):  # 新增的核心程序，对读取的数据进行划�
                 CheckSum += data
                 ByteNum += 1
             else:
-                if data == (CheckSum & \xff):
+                if data == (CheckSum & 0xff):
                     w = get_gyro(GYROData)
                 CheckSum = 0
                 ByteNum = 0
@@ -82,7 +82,7 @@ def DueData(inputData):  # 新增的核心程序，对读取的数据进行划�
                 CheckSum += data
                 ByteNum += 1
             else:
-                if data == (CheckSum & \xff):
+                if data == (CheckSum & 0xff):
                     m = get_m(mData)
                     d = list(a) + list(w) + list(m)
                     # print(f"a(g):{d[0]:.3f} {d[1]:.3f} {d[2]:.3f}\

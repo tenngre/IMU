@@ -9,7 +9,7 @@ import socket
 import time
 import argparse
 import serial
-from WitSensor import *
+from witSensor import *
 
 SPI_PORT = 0
 SPI_DEVICE = 0

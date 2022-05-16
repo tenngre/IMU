@@ -1,5 +1,5 @@
 import math
-
+import mpl_toolkits.mplot3d.axes3d as p3
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -10,9 +10,30 @@ def beta_pdf(x, a, b):
             / (math.gamma(a) * math.gamma(b)))
 
 
+def Gen_RandLine(length, dims=2):
+    """
+    Create a line using a random walk algorithm
+
+    length is the number of points for the line.
+    dims is the number of dimensions the line has.
+    """
+    lineData = np.empty((dims, length))
+    lineData[:, 0] = np.random.rand(dims)
+    for index in range(1, length):
+        # scaling the random numbers by 0.1 so
+        # movement is small compared to position.
+        # subtraction by 0.5 is to change the range to [-0.5, 0.5]
+        # to allow a line to move backwards.
+        step = ((np.random.rand(dims) - 0.5) * 0.1)
+        lineData[:, index] = lineData[:, index - 1] + step
+
+    return lineData
+
+
 class UpdateDist:
     def __init__(self, prob=0.5):
-        self.fig, self.ax = plt.subplots()
+        self.fig = plt.subplots()
+        self.ax = p3.Axes3D(self.fig)
         self.success = 0
         self.prob = prob
         self.line, = self.ax.plot([], [], 'k-')

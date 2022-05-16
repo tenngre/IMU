@@ -6,7 +6,6 @@ server : the server.
 """
 
 import socket
-import time
 import argparse
 import serial
 from witSensor import *
@@ -25,11 +24,9 @@ def senseTemperatures():  # TO DO rename it to sensorInit
     ser = serial.Serial("/dev/ttyS0", 9600, timeout=0.5)  # ser = serial.Serial('com7',115200, timeout=0.5)
     print(ser.is_open)
 
-    timeStart = time.time()
     transmitter = TransmitterSingleSocket()
     try:
         while True:
-            timeNow = time.time()
             dataHex = ser.read(33)
             data = DueData(dataHex)
             if data is not None:
